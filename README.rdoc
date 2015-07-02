@@ -1,28 +1,50 @@
-== README
+					NOTES :
 
-This README would normally document whatever steps are necessary to get the
-application up and running.
+Rails 4.1.8 ruby 2.0.0
+Follow the Steps to Learn
 
-Things you may want to cover:
+Twiter follow
+   1.rails generate scaffold User name:string title:string address:text
+   2.  rails generate model Friendship user:references 
+  3.
 
-* Ruby version
+class User < ActiveRecord::Base
+    has_many :followings
+    has_many :followers , through: :followings
 
-* System dependencies
-
-* Configuration
-
-* Database creation
-
-* Database initialization
-
-* How to run the test suite
-
-* Services (job queues, cache servers, search engines, etc.)
-
-* Deployment instructions
-
-* ...
+    has_many :inverse_followings, class_name: 'Following' ,:foreign_key => "follower_id"
+    has_many :inverse_followers , through: :inverse_followings , source: :user
+end
 
 
-Please feel free to use a different markup language if you do not plan to run
-<tt>rake doc:app</tt>.
+
+class Following < ActiveRecord::Base
+  belongs_to :user
+  belongs_to :follower , class_name: 'User'
+end
+
+
+
+QUERIES:
+
+1.@user1=User.find_or_create_by(name: 'User1')
+2.@user2=User.find_or_create_by(name: 'User2')
+3.@user3=User.find_or_create_by(name: 'User3')
+4.@user4=User.find_or_create_by(name: 'User4')
+5.@user1.followers (1 is following 2,3,4 )
+=> #<ActiveRecord::Associations::CollectionProxy [#<User id: 2, name: "User2", title: nil, address: nil, created_at: "2015-07-01 1
+2:41:18", updated_at: "2015-07-01 12:41:18">, #<User id: 3, name: "User3", title: nil, address: nil, created_at: "2015-07-01 12:41
+:24", updated_at: "2015-07-01 12:41:24">, #<User id: 4, name: "User4", title: nil, address: nil, created_at: "2015-07-01 13:37:25"
+, updated_at: "2015-07-01 13:37:25">]>
+
+To BE very specific from view we must use friend via followings associations
+
+6.@user1.followings[0].follower   (for each following find followers)
+
+Now who is following 1
+7.@user1.inverse_followers
+#<ActiveRecord::Associations::CollectionProxy []>
+Now who is following 2 its 1
+8.@user2.inverse_followers
+ #<ActiveRecord::Associations::CollectionProxy [#<User id: 1, name: "User1", title: nil, address: nil, created_at: "2015-07-01 1
+41:12", updated_at: "2015-07-01 12:41:12">]>
